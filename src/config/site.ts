@@ -11,7 +11,9 @@ export const siteConfig = {
     tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL ?? "",
     twitter: process.env.NEXT_PUBLIC_TWITTER_URL ?? "",
     website: process.env.NEXT_PUBLIC_SITE_URL ?? "https://mangoz-smp.pages.dev",
-    map: process.env.NEXT_PUBLIC_MAP_URL ?? "",
+    map:
+      process.env.NEXT_PUBLIC_MAP_URL ??
+      "http://mangozsmp.seedloaf.gg:51260/",
   },
   nav: [
     { label: "Home", href: "/" },

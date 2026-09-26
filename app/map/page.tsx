@@ -24,9 +24,10 @@ export default async function MapPage() {
           <iframe
             title="MangoZ SMP live map"
             src={mapUrl}
-            className="h-[70vh] w-full border-0"
+            className="h-[75vh] w-full border-0"
             loading="lazy"
             allowFullScreen
+            referrerPolicy="no-referrer"
           />
         ) : (
           <CardBody className="flex flex-col items-center gap-3 px-6 py-16 text-center">
@@ -56,11 +57,12 @@ export default async function MapPage() {
       </Card>
 
       <Card shadow="sm" className="mt-4 border border-default-200">
-        <CardBody className="flex flex-col gap-2 p-5 text-sm text-default-600 sm:flex-row sm:items-center">
-          <p>
-            <strong className="text-foreground">For server owners:</strong> deploy BlueMap or
-            Dynmap, expose its web UI over HTTPS, then set <code className="rounded bg-default-100 px-1.5 py-0.5 text-xs">NEXT_PUBLIC_MAP_URL</code> in
-            the hosting dashboard and redeploy.
+        <CardBody className="flex flex-col gap-3 p-5 text-sm text-default-600 sm:flex-row sm:items-center">
+          <p className="flex-1">
+            <strong className="text-foreground">Map not loading inside the page?</strong>{" "}
+            The map is served over plain HTTP, which most browsers block inside an
+            HTTPS site. Use “Open full map” below — it always works. (Server owners:
+            putting the map behind free Cloudflare HTTPS fixes embedding.)
           </p>
           {mapUrl ? (
             <Button
