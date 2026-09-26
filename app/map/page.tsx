@@ -10,7 +10,7 @@ export const revalidate = 60;
 
 export default async function MapPage() {
   const mapUrl = siteConfig.links.map;
-  const { status } = await getServerStatus();
+  const status = await getServerStatus().catch(() => null);
 
   return (
     <div className="py-10">

@@ -36,6 +36,5 @@ export interface ServerStats {
   totalDeaths: number;
   totalBlocksBroken: number;
   totalBlocksPlaced: number;
-  uptimePercent: number;
   updatedAt: string;
 }

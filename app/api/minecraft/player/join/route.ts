@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { upsertPlayer } from "@/lib/data";
+import { DbUnavailableError, upsertPlayer } from "@/lib/data";
 import { requireMinecraftAuth, validatePlayerPayload } from "@/lib/validation";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 
@@ -31,7 +31,16 @@ async function handler(req: Request, online: boolean) {
   if (!v.ok || !v.data) {
     return NextResponse.json({ success: false, error: v.error }, { status: 400 });
   }
-  const player = await upsertPlayer({ ...v.data, online });
+  const player = await upsertPlayer({ ...v.data, online }).catch((err) => {
+    if (err instanceof DbUnavailableError) return null;
+    throw err;
+  });
+  if (!player) {
+    return NextResponse.json(
+      { success: false, error: "Database not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." },
+      { status: 503 }
+    );
+  }
   return NextResponse.json({
     success: true,
     player: { uuid: player.uuid, username: player.username, online: player.online },

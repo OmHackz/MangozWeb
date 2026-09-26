@@ -5,6 +5,7 @@ import { Button, Card, CardBody, Chip } from "@heroui/react";
 import { ArrowLeft, CalendarDays, Clock, Coins, Skull, Swords, Wallet, Pickaxe, Boxes, Fingerprint } from "lucide-react";
 import PlayerAvatar from "@/components/PlayerAvatar";
 import StatCard from "@/components/StatCard";
+import { ErrorState } from "@/components/States";
 import { getPlayer } from "@/lib/data";
 import { formatDate, formatDateTime, formatMoney, formatPlaytimeLong, kdRatio, timeAgo } from "@/lib/format";
 import { bodyUrl } from "@/lib/minecraft";
@@ -17,7 +18,24 @@ export async function generateMetadata({ params }: { params: { username: string 
 
 export default async function PlayerProfilePage({ params }: { params: { username: string } }) {
   const username = decodeURIComponent(params.username);
-  const { player } = await getPlayer(username);
+  let player = null;
+  try {
+    player = await getPlayer(username);
+  } catch {
+    return (
+      <div className="py-10">
+        <Button as={Link} href="/players" variant="light" size="sm" startContent={<ArrowLeft size={15} aria-hidden />}>
+          All players
+        </Button>
+        <div className="mt-4">
+          <ErrorState
+            title="Unable to load player"
+            description="The website cannot reach its database right now. Please try again later."
+          />
+        </div>
+      </div>
+    );
+  }
   if (!player) notFound();
 
   return (

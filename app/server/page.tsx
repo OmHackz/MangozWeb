@@ -16,7 +16,7 @@ const icons: Record<string, typeof Coins> = {
 };
 
 export default async function ServerPage() {
-  const { status, live } = await getServerStatus();
+  const status = await getServerStatus().catch(() => null);
 
   return (
     <div className="py-10">
@@ -31,13 +31,12 @@ export default async function ServerPage() {
             <Card shadow="sm" className="border border-default-200">
               <CardBody className="grid gap-4 p-6 sm:grid-cols-2">
                 <Info label="Server name" value={serverConfig.name} />
-                <Info label="Version" value={status?.version ?? serverConfig.version} />
+                <Info label="Version" value={status?.version ?? "Unknown"} />
                 <Info label="Platform" value="Java + Bedrock crossplay" />
-                <Info label="Java" value={status?.javaOnline ?? true ? "Available" : "Unavailable"} />
-                <Info label="Bedrock" value={status?.bedrockOnline ?? true ? "Available" : "Unavailable"} />
-                <Info label="Status source" value={live ? "Live database" : "Demo data"} />
-                <Info label="Online" value={`${status?.playersOnline ?? 0} / ${status?.playersMax ?? 100}`} />
-                <Info label="Last updated" value={status ? timeAgo(status.updatedAt) : "—"} />
+                <Info label="Java" value={status ? (status.javaOnline ? "Available" : "Unavailable") : "Unknown"} />
+                <Info label="Bedrock" value={status ? (status.bedrockOnline ? "Available" : "Unavailable") : "Unknown"} />
+                <Info label="Online" value={status ? `${status.playersOnline} / ${status.playersMax}` : "Unknown"} />
+                <Info label="Last updated" value={status ? timeAgo(status.updatedAt) : "Never reported"} />
               </CardBody>
             </Card>
           </div>

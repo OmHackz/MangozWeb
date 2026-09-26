@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Activity, Boxes, Clock, Coins, Pickaxe, Skull, Swords, Users, Wifi } from "lucide-react";
 import { PageHeader, SectionHeader } from "@/components/Headers";
 import StatCard from "@/components/StatCard";
+import { ErrorState } from "@/components/States";
 import { getStats } from "@/lib/data";
 import { formatMoney, formatNumber, formatPlaytimeLong } from "@/lib/format";
 
@@ -9,13 +10,25 @@ export const metadata: Metadata = { title: "Stats" };
 export const revalidate = 30;
 
 export default async function StatsPage() {
-  const { stats, live } = await getStats();
+  const stats = await getStats().catch(() => null);
+
+  if (!stats) {
+    return (
+      <div className="py-10">
+        <PageHeader title="Server stats" description="Aggregate statistics from the MangoZ SMP server." />
+        <ErrorState
+          title="Unable to load stats"
+          description="The website cannot reach its database. If you are a server owner, check the database configuration and try again."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="py-10">
       <PageHeader
         title="Server stats"
-        description={live ? "Live aggregate statistics." : "Aggregate statistics from recent player data."}
+        description="Live aggregate statistics from real player data."
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total players" value={stats.totalPlayers} icon={Users} animated />

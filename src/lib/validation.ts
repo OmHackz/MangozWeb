@@ -20,6 +20,13 @@ function isSafeNumber(v: unknown, max = 1_000_000_000): v is number {
   );
 }
 
+function isSafeMoney(v: unknown): v is number {
+  // Money may arrive as a decimal (e.g. 1250.5 from economy plugins).
+  return (
+    typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 1_000_000_000_000
+  );
+}
+
 export interface PlayerUpdatePayload {
   uuid: string;
   username: string;
@@ -63,9 +70,10 @@ export function validatePlayerPayload(body: unknown): {
     return { ok: false, error: "Invalid username" };
   if (obj.online !== undefined && typeof obj.online !== "boolean")
     return { ok: false, error: "Invalid online flag" };
+  if (obj.money !== undefined && !isSafeMoney(obj.money))
+    return { ok: false, error: "Invalid numeric value for money" };
   const numericFields = [
     "playtime",
-    "money",
     "kills",
     "deaths",
     "blocksBroken",

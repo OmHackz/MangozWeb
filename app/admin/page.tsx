@@ -2,19 +2,19 @@ import type { Metadata } from "next";
 import { Card, CardBody, Chip } from "@heroui/react";
 import { Activity, Database, ShieldAlert, Users } from "lucide-react";
 import { PageHeader, SectionHeader } from "@/components/Headers";
-import { getPlayers, getServerStatus, getStats, isLive } from "@/lib/data";
+import { dbConfigured, getPlayers, getServerStatus, getStats } from "@/lib/data";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const authed = false; // TODO: wire Supabase Auth / middleware. Page stays hidden until then.
-  const [{ players }, { status }, { stats }] = await Promise.all([
-    getPlayers(),
-    getServerStatus(),
-    getStats(),
+  const [players, status, stats] = await Promise.all([
+    getPlayers().catch(() => null),
+    getServerStatus().catch(() => null),
+    getStats().catch(() => null),
   ]);
-  const live = isLive();
+  const live = dbConfigured() && players !== null;
 
   if (!authed) {
     return (
@@ -30,7 +30,7 @@ export default async function AdminPage() {
         <div className="mt-4 flex justify-center gap-2">
           <Chip size="sm" variant="flat">Route: /admin (noindex)</Chip>
           <Chip size="sm" variant="flat" color={live ? "success" : "warning"}>
-            DB: {live ? "connected" : "demo mode"}
+            DB: {live ? "connected" : "not connected"}
           </Chip>
         </div>
         <Card shadow="sm" className="mt-6 border border-default-200 text-left">
@@ -47,15 +47,22 @@ export default async function AdminPage() {
     <div className="py-10">
       <PageHeader title="Admin" description="Staff-only overview." />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card shadow="sm" className="border border-default-200"><CardBody className="p-5"><p className="flex items-center gap-2 text-sm font-semibold"><Users size={16} aria-hidden /> Online</p><p className="text-2xl font-bold">{players.filter((p) => p.online).length}</p></CardBody></Card>
+        <Card shadow="sm" className="border border-default-200"><CardBody className="p-5"><p className="flex items-center gap-2 text-sm font-semibold"><Users size={16} aria-hidden /> Online</p><p className="text-2xl font-bold">{(players ?? []).filter((p) => p.online).length}</p></CardBody></Card>
         <Card shadow="sm" className="border border-default-200"><CardBody className="p-5"><p className="flex items-center gap-2 text-sm font-semibold"><Activity size={16} aria-hidden /> API</p><p className="text-2xl font-bold">OK</p></CardBody></Card>
-        <Card shadow="sm" className="border border-default-200"><CardBody className="p-5"><p className="flex items-center gap-2 text-sm font-semibold"><Database size={16} aria-hidden /> DB</p><p className="text-2xl font-bold">{live ? "Live" : "Demo"}</p></CardBody></Card>
+        <Card shadow="sm" className="border border-default-200"><CardBody className="p-5"><p className="flex items-center gap-2 text-sm font-semibold"><Database size={16} aria-hidden /> DB</p><p className="text-2xl font-bold">{live ? "Live" : "Down"}</p></CardBody></Card>
       </div>
       <div className="mt-6">
         <SectionHeader title="Online players" />
         <ul className="text-sm">
-          {players.filter((p) => p.online).map((p) => <li key={p.uuid}>{p.username}</li>)}
+          {(players ?? []).filter((p) => p.online).map((p) => <li key={p.uuid}>{p.username}</li>)}
         </ul>
+        {status ? (
+          <p className="mt-2 text-xs text-default-500">
+            Last status report: {status.updatedAt} · {status.playersOnline}/{status.playersMax} online
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-default-500">No status report received yet.</p>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPlayers } from "@/lib/data";
+import { DbUnavailableError, getPlayers } from "@/lib/data";
 
 export const revalidate = 0;
 
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
     if (!ALLOWED.has(by)) {
       return NextResponse.json({ success: false, error: "Invalid category" }, { status: 400 });
     }
-    const { players, live } = await getPlayers();
+    const players = await getPlayers();
     const sorted = [...players].sort((a, b) => {
       if (by === "money") return b.money - a.money;
       if (by === "playtime") return b.playtime - a.playtime;
@@ -20,10 +20,11 @@ export async function GET(req: Request) {
       return b.deaths - a.deaths;
     });
     return NextResponse.json(
-      { success: true, by, entries: sorted.slice(0, 50), live },
+      { success: true, by, entries: sorted.slice(0, 50) },
       { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
     );
-  } catch {
-    return NextResponse.json({ success: false, error: "Unable to load leaderboard" }, { status: 500 });
+  } catch (err) {
+    const code = err instanceof DbUnavailableError ? 503 : 500;
+    return NextResponse.json({ success: false, error: "Unable to load leaderboard" }, { status: code });
   }
 }

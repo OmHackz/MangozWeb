@@ -9,14 +9,13 @@ import {
   Play,
   Compass,
   Globe,
-  Copy,
-  Check,
   Coins,
   Shield,
   Store,
   CalendarDays,
   Gamepad2,
   Puzzle,
+  AlertTriangle,
 } from "lucide-react";
 import ServerStatusCard from "@/components/ServerStatus";
 import ServerAddress from "@/components/ServerAddress";
@@ -47,12 +46,13 @@ const featureIcons: Record<string, typeof Coins> = {
 };
 
 export default async function HomePage() {
-  const [{ players }, { status }, { stats }] = await Promise.all([
-    getPlayers(),
-    getServerStatus(),
-    getStats(),
+  const [players, status, stats] = await Promise.all([
+    getPlayers().catch(() => null),
+    getServerStatus().catch(() => null),
+    getStats().catch(() => null),
   ]);
-  const onlinePlayers = players.filter((p) => p.online).slice(0, 4);
+  const onlinePlayers = (players ?? []).filter((p) => p.online).slice(0, 4);
+  const dbDown = players === null && status === null && stats === null;
 
   return (
     <div className="pb-10">
@@ -106,12 +106,27 @@ export default async function HomePage() {
       </section>
 
       {/* Quick stats */}
-      <section className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Server highlights">
-        <StatCard title="Players online" value={status?.playersOnline ?? 0} subtitle={`of ${status?.playersMax ?? 100} slots`} icon={Users} animated />
-        <StatCard title="Total players" value={stats.totalPlayers} icon={Users} animated />
-        <StatCard title="Server version" value={status?.version ?? serverConfig.version} subtitle="Java + Bedrock" icon={Server} />
-        <StatCard title="Uptime" value={`${stats.uptimePercent}%`} subtitle="Last 30 days" icon={Globe} />
-      </section>
+      {dbDown ? (
+        <Card shadow="sm" className="mt-8 border border-warning-300 bg-warning-50 dark:bg-warning-900/10">
+          <CardBody className="flex flex-row items-center gap-3 p-5">
+            <AlertTriangle size={20} className="shrink-0 text-warning-600" aria-hidden />
+            <div className="text-sm">
+              <p className="font-semibold">Live data unavailable</p>
+              <p className="text-default-600">
+                The website cannot reach its database yet. Server owners: set
+                SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, then redeploy.
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+      ) : (
+        <section className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Server highlights">
+          <StatCard title="Players online" value={status?.playersOnline ?? 0} subtitle={`of ${status?.playersMax ?? 100} slots`} icon={Users} animated />
+          <StatCard title="Total players" value={stats?.totalPlayers ?? 0} icon={Users} animated />
+          <StatCard title="Server version" value={status?.version ?? "Unknown"} subtitle="Java + Bedrock" icon={Server} />
+          <StatCard title="Coins in circulation" value={stats ? stats.totalMoney.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—"} icon={Coins} />
+        </section>
+      )}
 
       {/* Online now */}
       <section className="mt-12">

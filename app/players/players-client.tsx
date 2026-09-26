@@ -7,12 +7,6 @@ import PlayerCard from "@/components/PlayerCard";
 import { EmptyState } from "@/components/States";
 import type { Player } from "@/lib/types";
 
-function useDebounced(value: string, ms = 250): string {
-  const [v, setV] = useState(value);
-  // simple debounce via effect in component below
-  return v;
-}
-
 export default function PlayersClient({ initial }: { initial: Player[] }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -87,8 +81,12 @@ export default function PlayersClient({ initial }: { initial: Player[] }) {
 
       {filtered.length === 0 ? (
         <EmptyState
-          title="No players found"
-          description="There are currently no players matching your search."
+          title={initial.length === 0 ? "No players yet" : "No players found"}
+          description={
+            initial.length === 0
+              ? "No player data has been synced from the Minecraft server yet. Data appears here automatically once players join."
+              : "There are currently no players matching your search."
+          }
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

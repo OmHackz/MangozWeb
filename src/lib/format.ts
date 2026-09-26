@@ -18,7 +18,7 @@ export function formatPlaytimeLong(totalSeconds: number): string {
 
 export function formatMoney(n: number): string {
   if (!Number.isFinite(n)) return "0";
-  return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
 export function formatNumber(n: number): string {

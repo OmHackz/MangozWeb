@@ -4,7 +4,7 @@ Premium Minecraft SMP companion platform. Next.js App Router + TypeScript + Hero
 
 - Live URL: https://mangoz-smp.pages.dev
 - Stack: Next.js 14, HeroUI v2, Tailwind 3, framer-motion, next-themes, lucide-react
-- Backend: Next.js Route Handlers + optional free Supabase Postgres. **Runs in demo mode with zero config**; connect Supabase for live data.
+- Backend: Next.js Route Handlers + free Supabase Postgres. Supabase is **required** for live data — without it the site shows honest empty states instead of fake data.
 - Deploy: free on Vercel or Cloudflare Pages. No paid services, no credit card.
 
 ## Requirements
@@ -37,21 +37,27 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_BEDROCK_PORT` | public | no | Bedrock port (default `19132`) |
 | `NEXT_PUBLIC_MAP_URL` | public | no | BlueMap/Dynmap embed URL; empty = placeholder |
 | `NEXT_PUBLIC_DISCORD_URL` etc. | public | no | Only configured links are shown |
-| `SUPABASE_URL` | server | no | Enables live DB mode |
-| `SUPABASE_SERVICE_ROLE_KEY` | server | no | **Server-only.** Never expose to browser |
+| `SUPABASE_URL` | server | **yes (for live data)** | Enables the database. Without it the site shows empty states |
+| `SUPABASE_SERVICE_ROLE_KEY` | server | **yes (for live data)** | **Server-only.** Never expose to browser |
 | `MINECRAFT_API_KEY` | server | for MC sync | Protects `POST /api/minecraft/*`. Generate: `openssl rand -hex 32` |
 
 > Never put secrets in `NEXT_PUBLIC_*`. Never commit `.env.local`.
 
-## Database setup (free, optional)
+## Database setup (free, required for live data)
 
-The site works without a database (seeded demo data, Minecraft writes kept in memory).
-For persistence + multi-instance, use **Supabase free tier**:
+The site reads everything from the database — there is no demo data. Until the
+database is connected, pages show empty states ("No players yet",
+"Status unavailable") instead of fake numbers.
+
+Use **Supabase free tier**:
 
 1. Create a free project at https://supabase.com (no card required).
 2. SQL Editor → run `supabase/schema.sql` from this repo.
+   (If you ran an older version with integer `money`, the schema file includes the migration to `numeric`.)
 3. Project Settings → API → copy `SUPABASE_URL` + `service_role` key into `.env.local` / hosting env vars.
-4. Redeploy. `GET /api/health` should report `"db": "live"`.
+4. Set `MINECRAFT_API_KEY` to the same key your Skript config uses.
+5. Redeploy. `GET /api/health` should report `"db": "connected"` with player counts.
+6. Join the Minecraft server — your player should appear on `/players` within seconds.
 
 Free-tier notes: 500 MB DB, 2 GB bandwidth, pausing after inactivity on free projects. The site degrades to cached/demo reads if Supabase is unreachable; it never fakes "Online".
 
@@ -77,7 +83,7 @@ POST /api/minecraft/server/status  { online, playersOnline, playersMax, version,
 
 Public reads (no key): `GET /api/server/status`, `GET /api/players`, `GET /api/players/[username]`, `GET /api/stats`, `GET /api/leaderboards?by=money|playtime|kills|deaths`, `GET /api/health`.
 
-Validation: UUID v4 format, `^[A-Za-z0-9_]{3,16}$` usernames, non-negative integers, 8 KB body cap, unknown fields rejected, per-IP rate limiting.
+Validation: UUID v4 format, `^[A-Za-z0-9_]{3,16}$` usernames, non-negative integers for playtime/kills/deaths, money accepts decimals up to 2 places (e.g. `1250.5`), 8 KB body cap, unknown fields rejected, per-IP rate limiting. Minecraft write endpoints return `503` with a clear message when the database is not configured.
 
 Example:
 

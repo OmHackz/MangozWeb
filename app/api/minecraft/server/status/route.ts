@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setServerStatus } from "@/lib/data";
+import { DbUnavailableError, setServerStatus } from "@/lib/data";
 import { requireMinecraftAuth, validateStatusPayload } from "@/lib/validation";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 
@@ -31,6 +31,15 @@ export async function POST(req: Request) {
   if (!v.ok || !v.data) {
     return NextResponse.json({ success: false, error: v.error }, { status: 400 });
   }
-  const status = await setServerStatus(v.data);
+  const status = await setServerStatus(v.data).catch((err) => {
+    if (err instanceof DbUnavailableError) return null;
+    throw err;
+  });
+  if (!status) {
+    return NextResponse.json(
+      { success: false, error: "Database not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." },
+      { status: 503 }
+    );
+  }
   return NextResponse.json({ success: true, status });
 }
