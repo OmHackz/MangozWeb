@@ -4,6 +4,7 @@ import { CalendarDays, Coins, Gamepad2, Map as MapIcon, Puzzle, Shield, Store, U
 import { PageHeader, SectionHeader } from "@/components/Headers";
 import ServerStatusCard from "@/components/ServerStatus";
 import ServerAddress from "@/components/ServerAddress";
+import StatusPills from "@/components/StatusPills";
 import { serverConfig } from "@/config/server";
 import { getServerStatus } from "@/lib/data";
 import { timeAgo } from "@/lib/format";
@@ -44,6 +45,9 @@ export default async function ServerPage() {
         <div>
           <SectionHeader title="Live status" />
           <ServerStatusCard />
+          <div className="mt-4">
+            <StatusPills service="server" title="SERVER UPTIME — LAST 3H" />
+          </div>
           <Card shadow="sm" className="mt-4 border border-default-200">
             <CardBody className="flex items-center gap-3 p-5">
               <Wifi size={18} className="text-success" aria-hidden />

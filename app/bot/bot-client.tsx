@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, CardBody, Chip } from "@heroui/react";
 import { Bot, Clock, ExternalLink, Gauge, Tag, User } from "lucide-react";
 import StatCard from "@/components/StatCard";
+import StatusPills from "@/components/StatusPills";
 import { siteConfig } from "@/config/site";
 import { timeAgo } from "@/lib/format";
 import type { BotStatus } from "@/lib/data";
@@ -130,6 +131,7 @@ export default function BotClient({ initial }: { initial: BotStatus | null }) {
         <StatCard title="Bot account" value={bot.account ?? "—"} icon={User} colorIndex={3} />
         <StatCard title="Bot version" value={bot.version ? `v${bot.version}` : "—"} icon={Tag} colorIndex={0} />
       </div>
+      <StatusPills service="bot" title="BOT UPTIME — LAST 3H" />
     </div>
   );
 }

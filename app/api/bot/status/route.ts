@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   DbUnavailableError,
   getBotStatus,
+  recordHeartbeat,
   setBotStatus,
 } from "@/lib/data";
 import { requireBotAuth, validateBotPayload } from "@/lib/validation";
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
   }
   try {
     const status = await setBotStatus(v.data);
+    await recordHeartbeat({ service: "bot", online: v.data.online });
     return NextResponse.json({ success: true, bot: status });
   } catch (err) {
     if (err instanceof DbUnavailableError) {

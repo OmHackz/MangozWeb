@@ -124,6 +124,9 @@ def report(online: bool, account: str, version: str, latency_ms: int = 0):
 - On connect (`online: true`) and on disconnect/shutdown (`online: false`).
 - Heartbeat every **60 seconds** while connected.
 - The `/bot` page polls every 30s, so worst-case staleness is ~90s.
+- Every report is also stored as a history point for the 3-hour uptime graph
+  (`GET /api/status/history?service=bot&hours=3`). Points older than 7 days
+  are pruned automatically.
 
 ### Responses
 

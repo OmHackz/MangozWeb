@@ -56,6 +56,7 @@ Use **Supabase free tier**:
    - `supabase/schema.sql` (players, server status)
    - `supabase/store.sql` (store orders)
    - `supabase/bot.sql` (bot status)
+   - `supabase/status_history.sql` (3-hour status graphs for server + bot)
    - `supabase/news.sql` (optional announcements; inbox falls back to built-ins)
    (If you ran an older version with integer `money`, the schema file includes the migration to `numeric`.)
 3. Project Settings → API → copy `SUPABASE_URL` + `service_role` key into `.env.local` / hosting env vars.

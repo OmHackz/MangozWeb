@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { DbUnavailableError, setServerStatus } from "@/lib/data";
+import { DbUnavailableError, recordHeartbeat, setServerStatus } from "@/lib/data";
 import { requireMinecraftAuth, validateStatusPayload } from "@/lib/validation";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 
@@ -41,5 +41,10 @@ export async function POST(req: Request) {
       { status: 503 }
     );
   }
+  await recordHeartbeat({
+    service: "server",
+    online: v.data.online,
+    playersOnline: v.data.playersOnline,
+  });
   return NextResponse.json({ success: true, status });
 }

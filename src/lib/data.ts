@@ -340,3 +340,65 @@ export async function createStoreOrder(input: StoreOrderInput): Promise<string> 
   if (rows && rows[0]?.id) return String(rows[0].id);
   throw new DbUnavailableError("Could not save the order.");
 }
+
+export interface Heartbeat {
+  online: boolean;
+  playersOnline: number | null;
+  createdAt: string;
+}
+
+/**
+ * Log one status point for the history graphs. Failures are logged, never
+ * thrown — a graph gap is better than a failed report.
+ */
+export async function recordHeartbeat(input: {
+  service: "server" | "bot";
+  online: boolean;
+  playersOnline?: number;
+}): Promise<void> {
+  try {
+    await sb("status_heartbeats", {
+      method: "POST",
+      body: JSON.stringify({
+        service: input.service,
+        online: input.online,
+        players_online: input.playersOnline ?? null,
+      }),
+    });
+  } catch (err) {
+    console.error("[db] heartbeat insert failed:", err);
+    return;
+  }
+  // Best-effort retention: prune points older than 7 days.
+  try {
+    const cutoff = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    await sb(
+      `status_heartbeats?created_at=lt.${encodeURIComponent(cutoff)}`,
+      {
+        method: "DELETE",
+        headers: { Prefer: "return=minimal" },
+      }
+    );
+  } catch (err) {
+    console.error("[db] heartbeat prune failed:", err);
+  }
+}
+
+export async function getHeartbeats(
+  service: "server" | "bot",
+  sinceIso: string
+): Promise<Heartbeat[]> {
+  const rows = (await sb(
+    `status_heartbeats?service=eq.${service}&created_at=gte.${encodeURIComponent(
+      sinceIso
+    )}&select=online,players_online,created_at&order=created_at.asc&limit=5000`
+  )) as Record<string, unknown>[];
+  return rows.map((r) => ({
+    online: Boolean(r["online"]),
+    playersOnline:
+      typeof r["players_online"] === "number"
+        ? (r["players_online"] as number)
+        : null,
+    createdAt: String(r["created_at"]),
+  }));
+}
