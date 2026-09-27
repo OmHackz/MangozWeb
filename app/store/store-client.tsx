@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Card, CardBody, Chip, Input } from "@heroui/react";
+import { Card, CardBody, Chip } from "@heroui/react";
 import { ArrowLeft, BadgeCheck, Check, Copy, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import McButton from "@/components/McButton";
@@ -167,16 +167,34 @@ export default function StoreClient() {
             {step === "pay" ? (
               <>
                 {!authed ? (
-                  <Input
-                    label="Minecraft username (who gets the rank?)"
-                    labelPlacement="outside"
-                    placeholder="e.g. OmHackz"
-                    value={name}
-                    onValueChange={(v) => { setName(v); setNameError(""); }}
-                    maxLength={16}
-                    isInvalid={Boolean(nameError)}
-                    errorMessage={nameError}
-                  />
+                  <div>
+                    <label
+                      htmlFor="mc-buyer"
+                      className="mb-1.5 block font-pixel text-[10px] tracking-wider text-default-600"
+                    >
+                      MINECRAFT USERNAME (WHO GETS THE RANK?)
+                    </label>
+                    <input
+                      id="mc-buyer"
+                      type="text"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setNameError("");
+                      }}
+                      placeholder="e.g. OmHackz"
+                      maxLength={16}
+                      autoComplete="username"
+                      aria-invalid={Boolean(nameError)}
+                      aria-describedby={nameError ? "mc-buyer-error" : undefined}
+                      className="w-full rounded-[2px] border-2 border-black bg-[#1b1b1b] px-3 py-2.5 font-mono text-sm text-white placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+                    />
+                    {nameError ? (
+                      <p id="mc-buyer-error" role="alert" className="mt-1.5 text-xs text-danger">
+                        {nameError}
+                      </p>
+                    ) : null}
+                  </div>
                 ) : (
                   <p className="text-sm text-default-500">
                     Rank goes to <strong className="text-foreground">{authed}</strong>
@@ -210,17 +228,35 @@ export default function StoreClient() {
               </>
             ) : (
               <>
-                <Input
-                  label="12-digit UPI transaction / UTR number"
-                  labelPlacement="outside"
-                  placeholder="e.g. 402118773652"
-                  value={utr}
-                  inputMode="numeric"
-                  onValueChange={(v) => { setUtr(v.replace(/\D/g, "").slice(0, 12)); setUtrError(""); }}
-                  maxLength={12}
-                  isInvalid={Boolean(utrError)}
-                  errorMessage={utrError}
-                />
+                <div>
+                  <label
+                    htmlFor="mc-utr"
+                    className="mb-1.5 block font-pixel text-[10px] tracking-wider text-default-600"
+                  >
+                    12-DIGIT UPI TRANSACTION / UTR NUMBER
+                  </label>
+                  <input
+                    id="mc-utr"
+                    type="text"
+                    value={utr}
+                    onChange={(e) => {
+                      setUtr(e.target.value.replace(/\D/g, "").slice(0, 12));
+                      setUtrError("");
+                    }}
+                    placeholder="e.g. 402118773652"
+                    maxLength={12}
+                    inputMode="numeric"
+                    autoComplete="off"
+                    aria-invalid={Boolean(utrError)}
+                    aria-describedby={utrError ? "mc-utr-error" : undefined}
+                    className="w-full rounded-[2px] border-2 border-black bg-[#1b1b1b] px-3 py-2.5 font-mono text-sm tracking-widest text-white placeholder:text-neutral-500 placeholder:tracking-normal focus:border-primary focus:outline-none"
+                  />
+                  {utrError ? (
+                    <p id="mc-utr-error" role="alert" className="mt-1.5 text-xs text-danger">
+                      {utrError}
+                    </p>
+                  ) : null}
+                </div>
                 {submitError ? (
                   <p className="rounded-md border border-danger-300 bg-danger-50 p-2 text-sm text-danger-700" role="alert">
                     {submitError}
