@@ -7,7 +7,7 @@ import Link from "next/link";
 import McButton from "@/components/McButton";
 import McText from "@/components/McText";
 import { useAuth } from "@/components/AuthProvider";
-import { UPI_ID, storeItems, upiQrUrl, type StoreItem } from "@/config/store";
+import { UPI_ID, donationGoals, storeItems, upiQrUrl, type StoreItem } from "@/config/store";
 import { formatINR } from "@/lib/format";
 import { stripMcCodes } from "@/lib/mc-format";
 import { saveReceipt } from "@/lib/orders";
@@ -241,36 +241,97 @@ export default function StoreClient() {
     );
   }
 
+  const ranks = storeItems.filter((i) => i.kind === "rank");
+  const pickById = (id: string) => {
+    const found = storeItems.find((i) => i.id === id);
+    if (found) pick(found);
+  };
+
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {storeItems.map((i) => (
-        <Card key={i.id} shadow="sm" className="border-2 border-black">
-          <CardBody className="flex flex-col gap-3 p-6">
-            <div className="flex items-center justify-between">
-              <McText code={i.name} className="font-pixel text-xl" />
-              <BadgeCheck size={22} style={{ color: i.accent }} aria-hidden />
-            </div>
-            <p className="text-sm text-default-500">{i.tagline} · {i.duration}</p>
-            <ul className="space-y-1.5 text-sm">
-              {i.perks.map((p) => (
-                <li key={p}>
-                  <McText code={`&7• ${p}`} />
-                </li>
-              ))}
-            </ul>
-            <p className="font-pixel text-lg">{formatINR(i.priceInr)}</p>
-            <McButton
-              variant={i.id === "mvp" ? "grass" : "mango"}
-              className="w-full"
-              onPress={() => pick(i)}
-              aria-label={`Buy ${stripMcCodes(i.name)} for ${formatINR(i.priceInr)}`}
-            >
-              Buy {stripMcCodes(i.name)}
-            </McButton>
-          </CardBody>
-        </Card>
-      ))}
-      <Card shadow="sm" className="border-2 border-dashed border-default-300 md:col-span-3">
+    <div className="space-y-10">
+      <section aria-label="Ranks">
+        <p className="mb-3 font-pixel text-xs">RANKS — LIFETIME</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {ranks.map((i) => (
+            <Card key={i.id} shadow="sm" className="border-2 border-black">
+              <CardBody className="flex flex-col gap-3 p-6">
+                <div className="flex items-center justify-between">
+                  <McText code={i.name} className="font-pixel text-xl" />
+                  <BadgeCheck size={22} style={{ color: i.accent }} aria-hidden />
+                </div>
+                <p className="text-sm text-default-500">{i.tagline} · {i.duration}</p>
+                <ul className="space-y-1.5 text-sm">
+                  {i.perks.map((p) => (
+                    <li key={p}>
+                      <McText code={`&7• ${p}`} />
+                    </li>
+                  ))}
+                </ul>
+                <p className="font-pixel text-lg">{formatINR(i.priceInr)}</p>
+                <McButton
+                  variant={i.id === "mvp" ? "grass" : "mango"}
+                  className="w-full"
+                  onPress={() => pick(i)}
+                  aria-label={`Buy ${stripMcCodes(i.name)} for ${formatINR(i.priceInr)}`}
+                >
+                  Buy {stripMcCodes(i.name)}
+                </McButton>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section aria-label="Server donations">
+        <p className="mb-1 font-pixel text-xs">SERVER DONATIONS</p>
+        <p className="mb-3 text-sm text-default-500">
+          Chip in for running costs. Progress is updated manually as donations are verified.
+        </p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {donationGoals.map((g) => {
+            const item = storeItems.find((i) => i.id === g.itemId);
+            const pct = Math.min(100, Math.round((g.raisedInr / g.goalInr) * 100));
+            return (
+              <Card key={g.id} shadow="sm" className="border-2 border-black">
+                <CardBody className="flex flex-col gap-3 p-6">
+                  <div className="flex items-center justify-between">
+                    <p className="font-pixel text-xs">{g.label.toUpperCase()}</p>
+                    <Chip size="sm" variant="flat" color="primary">
+                      {formatINR(g.raisedInr)} / {formatINR(g.goalInr)}
+                    </Chip>
+                  </div>
+                  <div
+                    className="h-4 w-full rounded-[2px] border-2 border-black bg-default-200"
+                    role="progressbar"
+                    aria-valuenow={pct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${g.label} funding progress`}
+                  >
+                    <div
+                      className="h-full bg-emerald-600 transition-[width]"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-default-500">{pct}% funded</p>
+                  {item ? (
+                    <McButton
+                      variant="grass"
+                      className="w-full"
+                      onPress={() => pickById(item.id)}
+                      aria-label={`Donate ${formatINR(item.priceInr)} to ${g.label}`}
+                    >
+                      Donate {formatINR(item.priceInr)}
+                    </McButton>
+                  ) : null}
+                </CardBody>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      <Card shadow="sm" className="border-2 border-dashed border-default-300">
         <CardBody className="p-5 text-center text-sm text-default-500">
           Payments are verified manually by staff — ranks are granted in game after
           verification. No account needed; your Minecraft username is enough.

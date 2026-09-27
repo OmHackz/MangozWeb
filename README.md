@@ -144,9 +144,12 @@ curl -X POST http://localhost:3000/api/bot/status \
 
 Report on connect/disconnect plus a 60s heartbeat. Set `NEXT_PUBLIC_BOT_DASHBOARD_URL` to link the bot's own dashboard from `/bot`.
 
-## Store (ranks, UPI, INR)
+## Store (ranks, donations, UPI, INR)
 
-`/store` sells ranks (VIP ₹149, MVP ₹299, LEGEND ₹499 — edit `src/config/store.ts`).
+`/store` sells lifetime ranks (VIP ₹10, VIP+ ₹15, MVP ₹20, MVP+ ₹30) plus
+one-time server donations (hosting ₹100, database ₹50, site ₹50 — edit prices
+and perks in `src/config/store.ts`). Donation goal progress (`raisedInr`) is
+updated manually in the same file as payments are verified.
 Rank names and perks support Minecraft color codes (`&a`, `&l`, ...).
 
 Flow: pick a rank → pay via UPI QR (`9732234305-2@ibl`) → submit the 12-digit
