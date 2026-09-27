@@ -14,6 +14,7 @@ export const siteConfig = {
     map:
       process.env.NEXT_PUBLIC_MAP_URL ??
       "http://mangozsmp.seedloaf.gg:51260/",
+    botDashboard: process.env.NEXT_PUBLIC_BOT_DASHBOARD_URL ?? "",
   },
   nav: [
     { label: "Home", href: "/" },
@@ -22,6 +23,8 @@ export const siteConfig = {
     { label: "Map", href: "/map" },
     { label: "Stats", href: "/stats" },
     { label: "Leaderboards", href: "/leaderboards" },
+    { label: "Store", href: "/store" },
+    { label: "Bot", href: "/bot" },
     { label: "About", href: "/about" },
   ] as { label: string; href: string }[],
 };

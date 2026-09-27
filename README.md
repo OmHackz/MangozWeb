@@ -52,7 +52,11 @@ database is connected, pages show empty states ("No players yet",
 Use **Supabase free tier**:
 
 1. Create a free project at https://supabase.com (no card required).
-2. SQL Editor → run `supabase/schema.sql` from this repo.
+2. SQL Editor → run these files from this repo, in order:
+   - `supabase/schema.sql` (players, server status)
+   - `supabase/store.sql` (store orders)
+   - `supabase/bot.sql` (bot status)
+   - `supabase/news.sql` (optional announcements; inbox falls back to built-ins)
    (If you ran an older version with integer `money`, the schema file includes the migration to `numeric`.)
 3. Project Settings → API → copy `SUPABASE_URL` + `service_role` key into `.env.local` / hosting env vars.
 4. Set `MINECRAFT_API_KEY` to the same key your Skript config uses.
@@ -118,6 +122,56 @@ every 1 minute:
 ```
 
 Store the key in an env var / server-side config file, never in a public repo.
+
+## Bot status API
+
+The Discord bot reports in with an API key (`BOT_API_KEY`, falls back to `MINECRAFT_API_KEY`):
+
+```
+POST /api/bot/status   { online, uptimeSeconds, version?, guilds?, users?, latencyMs? }
+GET  /api/bot/status   public — powers the /bot page
+```
+
+Example:
+
+```bash
+curl -X POST http://localhost:3000/api/bot/status \
+  -H 'Content-Type: application/json' -H "x-api-key: $BOT_API_KEY" \
+  -d '{"online":true,"uptimeSeconds":86400,"version":"1.2.0","guilds":3,"users":1200,"latencyMs":85}'
+# => {"success":true,...}
+```
+
+Set `NEXT_PUBLIC_BOT_DASHBOARD_URL` to link the bot's own dashboard from `/bot`.
+
+## Store (ranks, UPI, INR)
+
+`/store` sells ranks (VIP ₹149, MVP ₹299, LEGEND ₹499 — edit `src/config/store.ts`).
+Rank names and perks support Minecraft color codes (`&a`, `&l`, ...).
+
+Flow: pick a rank → pay via UPI QR (`9732234305-2@ibl`) → submit the 12-digit
+UTR → order saved as `pending`. Staff verify payment (Supabase `store_orders`
+table, or the Discord ping) and grant the rank in game.
+
+- Prices are taken from the server config — client amounts are ignored.
+- Set `ORDER_WEBHOOK_URL` (Discord webhook) to get pinged on every order.
+- Buyers track orders in `/inbox` (device-local receipts).
+
+## Login & inbox
+
+Login is username-only (no password): the name is stored in the browser and
+used for the store, inbox and profile links. `/inbox` shows staff
+announcements (`announcements` table, else built-ins) plus the device's order
+receipts.
+
+## Artwork & fonts
+
+- Save the logo files as `public/logo-text.png` (banner) and
+  `public/logo-mango.png` (mango-on-block mark). The site falls back to a
+  styled text logo when they are missing.
+- Headings/buttons use a pixel stack ("Minecraft Ten" → "Minecraft Five" →
+  Press Start 2P). To use the official fonts, drop licensed
+  `minecraft-ten.woff2` / `minecraft-five.woff2` files into `public/fonts/` —
+  no code change needed.
 
 ## Deployment — Vercel (free)
 

@@ -7,7 +7,7 @@ export function PageHeader({
 }) {
   return (
     <header className="mb-8">
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
+      <h1 className="font-pixel text-xl tracking-tight sm:text-2xl">{title}</h1>
       {description ? (
         <p className="mt-2 max-w-2xl text-default-500">{description}</p>
       ) : null}

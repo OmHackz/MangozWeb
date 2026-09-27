@@ -10,6 +10,7 @@
 
 import { serverConfig } from "@/config/server";
 import type { Player, ServerStats, ServerStatus } from "./types";
+import type { NewsItem } from "@/config/news";
 
 export class DbUnavailableError extends Error {
   constructor(message = "Database unavailable") {
@@ -239,4 +240,107 @@ export async function setServerStatus(input: {
     updatedAt,
     motd: input.motd,
   };
+}
+
+export interface BotStatus {
+  online: boolean;
+  uptimeSeconds: number;
+  version?: string;
+  guilds: number;
+  users: number;
+  latencyMs?: number;
+  updatedAt: string;
+}
+
+/** Latest bot report, or null when the bot never reported / DB down. */
+export async function getBotStatus(): Promise<BotStatus | null> {
+  const rows = (await sb("bot_status?id=eq.1&select=*&limit=1")) as Record<
+    string,
+    unknown
+  >[];
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    online: Boolean(r["online"]),
+    uptimeSeconds: Number(r["uptime_seconds"] ?? 0),
+    version:
+      typeof r["version"] === "string" ? (r["version"] as string) : undefined,
+    guilds: Number(r["guilds"] ?? 0),
+    users: Number(r["users"] ?? 0),
+    latencyMs:
+      typeof r["latency_ms"] === "number"
+        ? (r["latency_ms"] as number)
+        : undefined,
+    updatedAt: String(r["updated_at"] ?? new Date().toISOString()),
+  };
+}
+
+export async function setBotStatus(input: {
+  online: boolean;
+  uptimeSeconds: number;
+  version?: string;
+  guilds?: number;
+  users?: number;
+  latencyMs?: number;
+}): Promise<BotStatus> {
+  const updatedAt = new Date().toISOString();
+  await sb("bot_status?id=eq.1", {
+    method: "PATCH",
+    body: JSON.stringify({
+      online: input.online,
+      uptime_seconds: input.uptimeSeconds,
+      version: input.version ?? null,
+      guilds: input.guilds ?? 0,
+      users: input.users ?? 0,
+      latency_ms: input.latencyMs ?? null,
+      updated_at: updatedAt,
+    }),
+  });
+  return {
+    online: input.online,
+    uptimeSeconds: input.uptimeSeconds,
+    version: input.version,
+    guilds: input.guilds ?? 0,
+    users: input.users ?? 0,
+    latencyMs: input.latencyMs,
+    updatedAt,
+  };
+}
+
+export async function getAnnouncements(): Promise<NewsItem[]> {
+  const rows = (await sb(
+    "announcements?select=*&order=created_at.desc&limit=20"
+  )) as Record<string, unknown>[];
+  return rows.map((r) => ({
+    id: String(r["id"]),
+    title: String(r["title"] ?? "Announcement"),
+    body: String(r["body"] ?? ""),
+    createdAt: String(r["created_at"] ?? new Date().toISOString()),
+  }));
+}
+
+export interface StoreOrderInput {
+  username: string;
+  itemId: string;
+  itemName: string;
+  amountInr: number;
+  upiId: string;
+  utr: string;
+}
+
+export async function createStoreOrder(input: StoreOrderInput): Promise<string> {
+  const rows = (await sb("store_orders", {
+    method: "POST",
+    body: JSON.stringify({
+      username: input.username,
+      item_id: input.itemId,
+      item_name: input.itemName,
+      amount_inr: input.amountInr,
+      upi_id: input.upiId,
+      utr: input.utr,
+      status: "pending",
+    }),
+  })) as { id: string }[] | null;
+  if (rows && rows[0]?.id) return String(rows[0].id);
+  throw new DbUnavailableError("Could not save the order.");
 }

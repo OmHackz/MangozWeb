@@ -163,3 +163,128 @@ export function requireMinecraftAuth(req: Request): boolean {
   }
   return diff === 0;
 }
+
+function extractKey(req: Request): string | null {
+  return (
+    req.headers.get("x-api-key") ??
+    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
+    null
+  );
+}
+
+function keyMatches(header: string | null, expected: string | undefined): boolean {
+  if (!expected || !header) return false;
+  if (header.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < header.length; i++) {
+    diff |= header.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/** Bot endpoints accept BOT_API_KEY, falling back to MINECRAFT_API_KEY. */
+export function requireBotAuth(req: Request): boolean {
+  const header = extractKey(req);
+  return (
+    keyMatches(header, process.env.BOT_API_KEY) ||
+    keyMatches(header, process.env.MINECRAFT_API_KEY)
+  );
+}
+
+export interface BotStatusPayload {
+  online: boolean;
+  uptimeSeconds: number;
+  version?: string;
+  guilds?: number;
+  users?: number;
+  latencyMs?: number;
+}
+
+const BOT_ALLOWED = new Set([
+  "online",
+  "uptimeSeconds",
+  "version",
+  "guilds",
+  "users",
+  "latencyMs",
+]);
+
+export function validateBotPayload(body: unknown): {
+  ok: boolean;
+  error?: string;
+  data?: BotStatusPayload;
+} {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { ok: false, error: "Invalid JSON body" };
+  }
+  const obj = body as Record<string, unknown>;
+  for (const key of Object.keys(obj)) {
+    if (!BOT_ALLOWED.has(key)) {
+      return { ok: false, error: `Unknown field: ${key}` };
+    }
+  }
+  if (typeof obj.online !== "boolean")
+    return { ok: false, error: "Invalid online flag" };
+  if (!isSafeInteger(obj.uptimeSeconds, 10_000_000_000))
+    return { ok: false, error: "Invalid uptimeSeconds" };
+  if (
+    obj.version !== undefined &&
+    (typeof obj.version !== "string" || obj.version.length > 32)
+  )
+    return { ok: false, error: "Invalid version" };
+  if (obj.guilds !== undefined && !isSafeInteger(obj.guilds, 10_000_000))
+    return { ok: false, error: "Invalid guilds" };
+  if (obj.users !== undefined && !isSafeInteger(obj.users, 1_000_000_000))
+    return { ok: false, error: "Invalid users" };
+  if (obj.latencyMs !== undefined && !isSafeInteger(obj.latencyMs, 600_000))
+    return { ok: false, error: "Invalid latencyMs" };
+  return { ok: true, data: obj as unknown as BotStatusPayload };
+}
+
+export interface StoreOrderPayload {
+  username: string;
+  itemId: string;
+  utr: string;
+}
+
+const ORDER_ALLOWED = new Set(["username", "itemId", "utr"]);
+const UTR_RE = /^\d{12}$/;
+
+export function validateOrderPayload(
+  body: unknown,
+  validItemIds: string[]
+): { ok: boolean; error?: string; data?: StoreOrderPayload } {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { ok: false, error: "Invalid JSON body" };
+  }
+  const obj = body as Record<string, unknown>;
+  for (const key of Object.keys(obj)) {
+    if (!ORDER_ALLOWED.has(key)) {
+      return { ok: false, error: `Unknown field: ${key}` };
+    }
+  }
+  if (!isValidUsername(obj.username))
+    return { ok: false, error: "Invalid username" };
+  if (typeof obj.itemId !== "string" || !validItemIds.includes(obj.itemId))
+    return { ok: false, error: "Invalid item" };
+  if (typeof obj.utr !== "string" || !UTR_RE.test(obj.utr.trim()))
+    return { ok: false, error: "Transaction ID must be the 12-digit UPI reference number." };
+  return {
+    ok: true,
+    data: {
+      username: (obj.username as string).trim(),
+      itemId: obj.itemId as string,
+      utr: (obj.utr as string).trim(),
+    },
+  };
+}
+
+function isSafeInteger(v: unknown, max: number): v is number {
+  return (
+    typeof v === "number" &&
+    Number.isFinite(v) &&
+    Number.isInteger(v) &&
+    v >= 0 &&
+    v <= max
+  );
+}

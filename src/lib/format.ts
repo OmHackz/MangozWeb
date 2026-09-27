@@ -21,6 +21,16 @@ export function formatMoney(n: number): string {
   return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
+/** Indian Rupee formatting for the store. */
+export function formatINR(n: number): string {
+  if (!Number.isFinite(n)) return "₹0";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: n % 1 === 0 ? 0 : 2,
+  }).format(n);
+}
+
 export function formatNumber(n: number): string {
   if (!Number.isFinite(n)) return "0";
   return n.toLocaleString("en-US");

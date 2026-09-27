@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import Navbar from "@/components/Navbar";
@@ -7,6 +7,11 @@ import Footer from "@/components/Footer";
 import { siteConfig } from "@/config/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const pixel = Press_Start_2P({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-pixel",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -35,7 +40,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
+      <body className={`${inter.variable} ${pixel.variable} font-sans bg-background text-foreground antialiased`}>
         <Providers>
           <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-white">
             Skip to content

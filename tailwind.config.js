@@ -11,6 +11,12 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
+        pixel: [
+          '"Minecraft Ten"',
+          '"Minecraft Five"',
+          "var(--font-pixel)",
+          "monospace",
+        ],
       },
       colors: {
         mango: {

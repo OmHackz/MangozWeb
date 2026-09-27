@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Citrus, DiscordIcon, YoutubeIcon } from "./BrandIcons";
+import { LogoMark, LogoText } from "./Logo";
+import { DiscordIcon, YoutubeIcon } from "./BrandIcons";
 import { siteConfig } from "@/config/site";
 import { Globe } from "lucide-react";
 
@@ -16,10 +17,8 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Citrus size={18} aria-hidden />
-            </span>
-            <span className="font-bold">MangoZ SMP</span>
+            <LogoMark size={36} />
+            <LogoText height={30} />
           </div>
           <p className="mt-3 max-w-xs text-sm text-default-500">
             {siteConfig.tagline} A community-driven Minecraft survival server
@@ -56,12 +55,12 @@ export default function Footer() {
           </ul>
           <div className="mt-4 flex gap-2">
             {siteConfig.links.discord ? (
-              <a href={siteConfig.links.discord} target="_blank" rel="noreferrer" aria-label="Discord" className="rounded-lg bg-default-100 p-2 hover:bg-primary/15">
+              <a href={siteConfig.links.discord} target="_blank" rel="noreferrer" aria-label="Discord" className="rounded-md border-2 border-black bg-default-100 p-2 hover:bg-primary/15">
                 <DiscordIcon />
               </a>
             ) : null}
             {siteConfig.links.youtube ? (
-              <a href={siteConfig.links.youtube} target="_blank" rel="noreferrer" aria-label="YouTube" className="rounded-lg bg-default-100 p-2 hover:bg-primary/15">
+              <a href={siteConfig.links.youtube} target="_blank" rel="noreferrer" aria-label="YouTube" className="rounded-md border-2 border-black bg-default-100 p-2 hover:bg-primary/15">
                 <YoutubeIcon />
               </a>
             ) : null}

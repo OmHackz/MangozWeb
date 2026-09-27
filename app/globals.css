@@ -6,6 +6,21 @@
   color-scheme: light dark;
 }
 
+/* Optional official fonts — drop files in public/fonts/ to use them.
+   Without them the stack falls back to Press Start 2P (loaded below). */
+@font-face {
+  font-family: "Minecraft Ten";
+  src: url("/fonts/minecraft-ten.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Minecraft Five";
+  src: url("/fonts/minecraft-five.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -16,6 +31,98 @@ body {
 
 .image-pixelated {
   image-rendering: pixelated;
+}
+
+/* Minecraft-style heading: pixel font + hard shadow like in-game text */
+.mc-title {
+  font-family: "Minecraft Ten", "Minecraft Five", var(--font-pixel),
+    monospace;
+  letter-spacing: 0.02em;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+}
+.mc-title-light {
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Classic Minecraft button: chunky black border, stone face, press effect */
+.mc-button {
+  font-family: "Minecraft Ten", "Minecraft Five", var(--font-pixel),
+    monospace !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.03em;
+  color: #fff !important;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5) !important;
+  background: linear-gradient(
+    to bottom,
+    #9a9a9a 0%,
+    #8b8b8b 12%,
+    #6f6f6f 50%,
+    #5f5f5f 100%
+  ) !important;
+  border: 2px solid #000 !important;
+  border-radius: 2px !important;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.35),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.35) !important;
+  transition: filter 0.08s ease, transform 0.05s ease !important;
+}
+.mc-button:hover {
+  filter: brightness(1.08) !important;
+}
+.mc-button:active {
+  transform: translateY(1px) !important;
+  box-shadow:
+    inset -2px -2px 0 rgba(255, 255, 255, 0.2),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+.mc-button:disabled {
+  opacity: 0.6;
+}
+
+/* Green (grass) variant for primary actions */
+.mc-button-grass {
+  background: linear-gradient(
+    to bottom,
+    #7cb342 0%,
+    #689f38 15%,
+    #558b2f 55%,
+    #33691e 100%
+  ) !important;
+}
+
+/* Amber (mango) variant for brand actions */
+.mc-button-mango {
+  background: linear-gradient(
+    to bottom,
+    #ffb300 0%,
+    #f59e0b 15%,
+    #d97706 55%,
+    #92400e 100%
+  ) !important;
+}
+
+/* Dark dirt/stone panel with MC-style border */
+.mc-panel {
+  background: #2b2b2b;
+  border: 2px solid #000;
+  border-radius: 2px;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.08),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+  color: #f0f0f0;
+}
+.mc-panel-light {
+  background: #f4f4f4;
+  border: 2px solid #1a1a1a;
+  color: #1a1a1a;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.9),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* Pixel input */
+.mc-input input {
+  font-family: monospace;
 }
 
 /* Focus visibility */

@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Login" };
 export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md py-10">
-      <PageHeader title="Login" description="Accounts arrive with the next update. Join the Discord meanwhile." />
+      <PageHeader title="Login" description="One field. Your Minecraft username. That's the whole account." />
       <LoginForm />
     </div>
   );
