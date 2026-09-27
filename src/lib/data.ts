@@ -245,14 +245,13 @@ export async function setServerStatus(input: {
 export interface BotStatus {
   online: boolean;
   uptimeSeconds: number;
+  account?: string;
   version?: string;
-  guilds: number;
-  users: number;
   latencyMs?: number;
   updatedAt: string;
 }
 
-/** Latest bot report, or null when the bot never reported / DB down. */
+/** Latest AFK bot report, or null when the bot never reported / DB down. */
 export async function getBotStatus(): Promise<BotStatus | null> {
   const rows = (await sb("bot_status?id=eq.1&select=*&limit=1")) as Record<
     string,
@@ -263,10 +262,10 @@ export async function getBotStatus(): Promise<BotStatus | null> {
   return {
     online: Boolean(r["online"]),
     uptimeSeconds: Number(r["uptime_seconds"] ?? 0),
+    account:
+      typeof r["account"] === "string" ? (r["account"] as string) : undefined,
     version:
       typeof r["version"] === "string" ? (r["version"] as string) : undefined,
-    guilds: Number(r["guilds"] ?? 0),
-    users: Number(r["users"] ?? 0),
     latencyMs:
       typeof r["latency_ms"] === "number"
         ? (r["latency_ms"] as number)
@@ -278,9 +277,8 @@ export async function getBotStatus(): Promise<BotStatus | null> {
 export async function setBotStatus(input: {
   online: boolean;
   uptimeSeconds: number;
+  account?: string;
   version?: string;
-  guilds?: number;
-  users?: number;
   latencyMs?: number;
 }): Promise<BotStatus> {
   const updatedAt = new Date().toISOString();
@@ -289,9 +287,8 @@ export async function setBotStatus(input: {
     body: JSON.stringify({
       online: input.online,
       uptime_seconds: input.uptimeSeconds,
+      account: input.account ?? null,
       version: input.version ?? null,
-      guilds: input.guilds ?? 0,
-      users: input.users ?? 0,
       latency_ms: input.latencyMs ?? null,
       updated_at: updatedAt,
     }),
@@ -299,9 +296,8 @@ export async function setBotStatus(input: {
   return {
     online: input.online,
     uptimeSeconds: input.uptimeSeconds,
+    account: input.account,
     version: input.version,
-    guilds: input.guilds ?? 0,
-    users: input.users ?? 0,
     latencyMs: input.latencyMs,
     updatedAt,
   };

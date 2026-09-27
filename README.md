@@ -123,12 +123,13 @@ every 1 minute:
 
 Store the key in an env var / server-side config file, never in a public repo.
 
-## Bot status API
+## Bot status API (AFK bot)
 
-The Discord bot reports in with an API key (`BOT_API_KEY`, falls back to `MINECRAFT_API_KEY`):
+The Minecraft AFK bot reports in with an API key (`BOT_API_KEY`, falls back to `MINECRAFT_API_KEY`).
+Full spec with Mineflayer/Python examples: [`BOT_API.md`](./BOT_API.md).
 
 ```
-POST /api/bot/status   { online, uptimeSeconds, version?, guilds?, users?, latencyMs? }
+POST /api/bot/status   { online, uptimeSeconds, account?, version?, latencyMs? }
 GET  /api/bot/status   public — powers the /bot page
 ```
 
@@ -137,11 +138,11 @@ Example:
 ```bash
 curl -X POST http://localhost:3000/api/bot/status \
   -H 'Content-Type: application/json' -H "x-api-key: $BOT_API_KEY" \
-  -d '{"online":true,"uptimeSeconds":86400,"version":"1.2.0","guilds":3,"users":1200,"latencyMs":85}'
+  -d '{"online":true,"uptimeSeconds":3600,"account":"MangoZ_AFK","version":"1.4.0","latencyMs":42}'
 # => {"success":true,...}
 ```
 
-Set `NEXT_PUBLIC_BOT_DASHBOARD_URL` to link the bot's own dashboard from `/bot`.
+Report on connect/disconnect plus a 60s heartbeat. Set `NEXT_PUBLIC_BOT_DASHBOARD_URL` to link the bot's own dashboard from `/bot`.
 
 ## Store (ranks, UPI, INR)
 

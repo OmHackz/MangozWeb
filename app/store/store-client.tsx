@@ -169,6 +169,7 @@ export default function StoreClient() {
                 {!authed ? (
                   <Input
                     label="Minecraft username (who gets the rank?)"
+                    labelPlacement="outside"
                     placeholder="e.g. OmHackz"
                     value={name}
                     onValueChange={(v) => { setName(v); setNameError(""); }}
@@ -211,6 +212,7 @@ export default function StoreClient() {
               <>
                 <Input
                   label="12-digit UPI transaction / UTR number"
+                  labelPlacement="outside"
                   placeholder="e.g. 402118773652"
                   value={utr}
                   inputMode="numeric"

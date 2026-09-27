@@ -72,6 +72,7 @@ export default function LoginForm() {
         <form onSubmit={submit} className="mt-4 space-y-4">
           <Input
             label="Minecraft username"
+            labelPlacement="outside"
             placeholder="e.g. OmHackz"
             value={name}
             onValueChange={(v) => {

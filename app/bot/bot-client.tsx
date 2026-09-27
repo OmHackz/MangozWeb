@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Button, Card, CardBody, Chip } from "@heroui/react";
-import { Bot, Clock, ExternalLink, Gauge, Server, Users } from "lucide-react";
+import { Bot, Clock, ExternalLink, Gauge, Tag, User } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import { siteConfig } from "@/config/site";
-import { formatNumber, timeAgo } from "@/lib/format";
+import { timeAgo } from "@/lib/format";
 import type { BotStatus } from "@/lib/data";
 
 function formatUptime(totalSeconds: number): string {
@@ -53,11 +53,11 @@ export default function BotClient({ initial }: { initial: BotStatus | null }) {
           <div className="flex h-12 w-12 items-center justify-center rounded-[2px] border-2 border-black bg-default-300 text-default-600">
             <Bot size={22} aria-hidden />
           </div>
-          <p className="font-pixel text-sm">BOT OFFLINE OR NOT REPORTING</p>
+          <p className="font-pixel text-sm">AFK BOT NOT REPORTING</p>
           <p className="max-w-sm text-sm text-default-500">
-            The bot has not sent a status report yet. It reports to{" "}
+            The AFK bot has not sent a status report yet. It reports to{" "}
             <code className="rounded bg-default-100 px-1 text-xs">POST /api/bot/status</code> —
-            check the README for the payload format.
+            see <code className="rounded bg-default-100 px-1 text-xs">BOT_API.md</code> for the payload format.
           </p>
           {siteConfig.links.botDashboard ? (
             <Button
@@ -87,10 +87,13 @@ export default function BotClient({ initial }: { initial: BotStatus | null }) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-pixel text-sm">MANGOZ BOT</p>
+              <p className="font-pixel text-sm">MANGOZ AFK BOT</p>
               <Chip size="sm" variant="flat" color={bot.online ? "success" : "danger"}>
                 {bot.online ? "Online" : "Offline"}
               </Chip>
+              {bot.account ? (
+                <Chip size="sm" variant="flat">{bot.account}</Chip>
+              ) : null}
               {bot.version ? (
                 <Chip size="sm" variant="flat">v{bot.version}</Chip>
               ) : null}
@@ -119,13 +122,13 @@ export default function BotClient({ initial }: { initial: BotStatus | null }) {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard title="Uptime" value={formatUptime(bot.uptimeSeconds)} icon={Clock} colorIndex={1} />
         <StatCard
-          title="Latency"
+          title="Ping to server"
           value={bot.latencyMs !== undefined ? `${bot.latencyMs} ms` : "—"}
           icon={Gauge}
           colorIndex={2}
         />
-        <StatCard title="Servers" value={formatNumber(bot.guilds)} icon={Server} colorIndex={3} />
-        <StatCard title="Users" value={formatNumber(bot.users)} icon={Users} colorIndex={0} />
+        <StatCard title="Bot account" value={bot.account ?? "—"} icon={User} colorIndex={3} />
+        <StatCard title="Bot version" value={bot.version ? `v${bot.version}` : "—"} icon={Tag} colorIndex={0} />
       </div>
     </div>
   );

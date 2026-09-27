@@ -10,7 +10,7 @@ export default async function BotPage() {
   const initial = await getBotStatus().catch(() => null);
   return (
     <div className="py-10">
-      <PageHeader title="Bot status" description="Live status of the MangoZ Discord bot." />
+      <PageHeader title="Bot status" description="Live status of the MangoZ AFK bot." />
       <BotClient initial={initial} />
     </div>
   );

@@ -194,18 +194,19 @@ export function requireBotAuth(req: Request): boolean {
 export interface BotStatusPayload {
   online: boolean;
   uptimeSeconds: number;
+  /** The AFK bot's Minecraft username. */
+  account?: string;
+  /** Bot software version, e.g. "1.4.0". */
   version?: string;
-  guilds?: number;
-  users?: number;
+  /** Ping to the Minecraft server in ms. */
   latencyMs?: number;
 }
 
 const BOT_ALLOWED = new Set([
   "online",
   "uptimeSeconds",
+  "account",
   "version",
-  "guilds",
-  "users",
   "latencyMs",
 ]);
 
@@ -227,15 +228,13 @@ export function validateBotPayload(body: unknown): {
     return { ok: false, error: "Invalid online flag" };
   if (!isSafeInteger(obj.uptimeSeconds, 10_000_000_000))
     return { ok: false, error: "Invalid uptimeSeconds" };
+  if (obj.account !== undefined && !isValidUsername(obj.account))
+    return { ok: false, error: "Invalid account username" };
   if (
     obj.version !== undefined &&
     (typeof obj.version !== "string" || obj.version.length > 32)
   )
     return { ok: false, error: "Invalid version" };
-  if (obj.guilds !== undefined && !isSafeInteger(obj.guilds, 10_000_000))
-    return { ok: false, error: "Invalid guilds" };
-  if (obj.users !== undefined && !isSafeInteger(obj.users, 1_000_000_000))
-    return { ok: false, error: "Invalid users" };
   if (obj.latencyMs !== undefined && !isSafeInteger(obj.latencyMs, 600_000))
     return { ok: false, error: "Invalid latencyMs" };
   return { ok: true, data: obj as unknown as BotStatusPayload };
