@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server";
 import { DbUnavailableError, getHeartbeats } from "@/lib/data";
+import type { Pill, PillState } from "@/lib/types";
 
 export const revalidate = 0;
-
-export type PillState = "up" | "down" | "partial" | "nodata";
-
-export interface Pill {
-  /** Bucket start (ISO). */
-  t: string;
-  state: PillState;
-  /** 0–1 fraction of online reports in the bucket, null when no data. */
-  uptime: number | null;
-  /** Average players online in the bucket (server only). */
-  players: number | null;
-}
 
 function clampHours(v: string | null): number {
   const n = parseInt(v ?? "", 10);

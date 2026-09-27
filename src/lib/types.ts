@@ -38,3 +38,15 @@ export interface ServerStats {
   totalBlocksPlaced: number;
   updatedAt: string;
 }
+
+export type PillState = "up" | "down" | "partial" | "nodata";
+
+export interface Pill {
+  /** Bucket start (ISO). */
+  t: string;
+  state: PillState;
+  /** 0–1 fraction of online reports in the bucket, null when no data. */
+  uptime: number | null;
+  /** Average players online in the bucket (server only). */
+  players: number | null;
+}

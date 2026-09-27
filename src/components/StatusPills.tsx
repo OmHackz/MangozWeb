@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardBody, Chip, Skeleton } from "@heroui/react";
-import type { Pill } from "@/app/api/status/history/route";
+import type { Pill } from "@/lib/types";
 
 const PILL_COLOR: Record<Pill["state"], string> = {
   up: "bg-emerald-500",
